@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import KartaZadania from './components/KartaZadania'
+import FormularzZadania from './components/FormularzZadania'
 import './App.css'
 
 function App() {
@@ -11,19 +12,14 @@ function App() {
 
   const zadaniaWKolumnie = (status) => zadania.filter((z) => z.status === status)
 
-  // wywoływane non-stop podczas przeciągania nad kolumną - MUSI zapobiec
-  // domyślnemu zachowaniu przeglądarki, inaczej "upuszczenie" nie zadziała
   const obslugaDragOver = (event) => {
     event.preventDefault()
   }
 
-  // wywoływane w momencie upuszczenia karty na kolumnie
   const obslugaDrop = (event, nowyStatus) => {
     event.preventDefault()
     const idZadania = Number(event.dataTransfer.getData('id-zadania'))
 
-    // setZadania z funkcją zamiast wartości - "weź poprzedni stan (poprzednieZadania)
-    // i zwróć nową tablicę na jego podstawie" - bezpieczny sposób aktualizacji stanu
     setZadania((poprzednieZadania) =>
       poprzednieZadania.map((zadanie) =>
         zadanie.id === idZadania ? { ...zadanie, status: nowyStatus } : zadanie
@@ -31,9 +27,21 @@ function App() {
     )
   }
 
+  // dodaje nowe zadanie do stanu - zawsze trafia do kolumny "do-zrobienia"
+  const dodajZadanie = (tytul, opis) => {
+    const noweZadanie = {
+      id: Date.now(), // prosty sposób na unikalne ID - znacznik czasu w milisekundach
+      tytul,
+      opis,
+      status: 'do-zrobienia',
+    }
+    setZadania((poprzednieZadania) => [...poprzednieZadania, noweZadanie])
+  }
+
   return (
     <div>
       <h1>Moja tablica kanban</h1>
+      <FormularzZadania onDodajZadanie={dodajZadanie} />
       <div className="tablica">
         {[
           { status: 'do-zrobienia', etykieta: 'Do zrobienia' },
